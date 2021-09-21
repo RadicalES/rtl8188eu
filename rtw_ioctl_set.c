@@ -62,6 +62,8 @@ u8 rtw_do_join(_adapter *padapter)
 	_queue	*queue	= &(pmlmepriv->scanned_queue);
 	u8 ret = _SUCCESS;
 
+	RTW_PRINT("rtw_do_join:%pM\n", &pmlmepriv->assoc_ssid);
+
 	_enter_critical_bh(&(pmlmepriv->scanned_queue.lock), &irqL);
 	phead = get_list_head(queue);
 	plist = get_next(phead);
@@ -77,6 +79,8 @@ u8 rtw_do_join(_adapter *padapter)
 	if (_rtw_queue_empty(queue) ) {
 		_exit_critical_bh(&(pmlmepriv->scanned_queue.lock), &irqL);
 		_clr_fwstate_(pmlmepriv, _FW_UNDER_LINKING);
+
+		RTW_PRINT("rtw_do_join: empty q\n");
 
 		/* when set_ssid/set_bssid for rtw_do_join(), but scanning queue is empty */
 		/* we try to issue sitesurvey firstly	 */
@@ -102,7 +106,9 @@ u8 rtw_do_join(_adapter *padapter)
 		if (select_ret == _SUCCESS) {
 			pmlmepriv->to_join = false;
 			_set_timer(&pmlmepriv->assoc_timer, MAX_JOIN_TIMEOUT);
+			RTW_PRINT("rtw_do_join: joined from Q OK\n");
 		} else {
+			RTW_PRINT("rtw_do_join: joined from Q !OK\n");
 			if (check_fwstate(pmlmepriv, WIFI_ADHOC_STATE) ) {
 				/* submit createbss_cmd to change to a ADHOC_MASTER */
 

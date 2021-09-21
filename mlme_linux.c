@@ -376,7 +376,7 @@ void _ft_link_timer_hdl(struct timer_list *t)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 15, 0)
 	_adapter *padapter = (_adapter *)FunctionContext;
 #else
-	_adapter *padapter = from_timer(ipadapter, t, ft_link_timer);
+	_adapter *padapter = from_timer(padapter, t, mlmeextpriv.ft_link_timer);
 #endif
 
 	ft_link_timer_hdl(padapter);
@@ -385,15 +385,15 @@ void _ft_link_timer_hdl(struct timer_list *t)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 15, 0)
 void _ft_roam_timer_hdl(void *FunctionContext)
 #else
-void _ft_roam_timer_hdl(struct timer_list *t);
+void _ft_roam_timer_hdl(struct timer_list *t)
 #endif
 {
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 15, 0)
 	_adapter *padapter = (_adapter *)FunctionContext;
 #else
-	_adapter *padapter = from_timer(adapter, t, ft_roam_timer);
+	_adapter *padapter = from_timer(padapter, t, mlmeextpriv.ft_roam_timer);
 #endif
-
+	RTW_INFO("ROAM TIMEOUT\n");
 	ft_roam_timer_hdl(padapter);
 }
 #endif
@@ -504,6 +504,7 @@ void init_mlme_ext_timer(_adapter *padapter)
 	timer_setup(&pmlmeext->survey_timer, _survey_timer_hdl, 0);
 	timer_setup(&pmlmeext->link_timer, _link_timer_hdl, 0);
 #ifdef CONFIG_RTW_80211R
+	RTW_INFO("Setup ROAMING timer\n");
 	timer_setup(&pmlmeext->ft_link_timer, _ft_link_timer_hdl, 0);
 	timer_setup(&pmlmeext->ft_roam_timer, _ft_roam_timer_hdl, 0);
 #endif

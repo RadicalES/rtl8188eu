@@ -1071,10 +1071,10 @@ static int rtw_ieee802_11_parse_vendor_specific(u8 *pos, uint elen,
 		break;
 
 	default:
-		RTW_DBG("unknown vendor specific information "
-			"element ignored (vendor OUI %02x:%02x:%02x "
-			"len=%lu)\n",
-			pos[0], pos[1], pos[2], (unsigned long) elen);
+		// RTW_DBG("unknown vendor specific information "
+		// 	"element ignored (vendor OUI %02x:%02x:%02x "
+		// 	"len=%lu)\n",
+		// 	pos[0], pos[1], pos[2], (unsigned long) elen);
 		return -1;
 	}
 
@@ -1109,10 +1109,10 @@ ParseRes rtw_ieee802_11_parse_elems(u8 *start, uint len,
 
 		if (elen > left) {
 			if (show_errors) {
-				RTW_INFO("IEEE 802.11 element "
-					 "parse failed (id=%d elen=%d "
-					 "left=%lu)\n",
-					 id, elen, (unsigned long) left);
+				// RTW_INFO("IEEE 802.11 element "
+				// 	 "parse failed (id=%d elen=%d "
+				// 	 "left=%lu)\n",
+				// 	 id, elen, (unsigned long) left);
 			}
 			return ParseFailed;
 		}
@@ -1212,9 +1212,9 @@ ParseRes rtw_ieee802_11_parse_elems(u8 *start, uint len,
 			unknown++;
 			if (!show_errors)
 				break;
-			RTW_DBG("IEEE 802.11 element parse "
-				"ignored unknown element (id=%d elen=%d)\n",
-				id, elen);
+			// RTW_DBG("IEEE 802.11 element parse "
+			// 	"ignored unknown element (id=%d elen=%d)\n",
+			// 	id, elen);
 			break;
 		}
 

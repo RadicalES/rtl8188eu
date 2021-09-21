@@ -2100,8 +2100,8 @@ static int check_ielen(u8 *start, uint len)
 		left -= 2;
 
 		if (elen > left) {
-			RTW_INFO("IEEE 802.11 element parse failed (id=%d elen=%d left=%lu)\n",
-					id, elen, (unsigned long) left);
+			// RTW_INFO("IEEE 802.11 element parse failed (id=%d elen=%d left=%lu)\n",
+//					id, elen, (unsigned long) left);
 			return false;
 		}
 		if ((id == WLAN_EID_VENDOR_SPECIFIC) && (elen < 4))

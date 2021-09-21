@@ -1130,6 +1130,7 @@ void rtw_surveydone_event_callback(_adapter	*adapter, u8 *pbuf)
 	mlmeext_surveydone_event_callback(adapter);
 #endif
 
+	RTW_INFO("SURVEY EVENT DONE\n");
 
 	_enter_critical_bh(&pmlmepriv->lock, &irqL);
 	if (pmlmepriv->wps_probe_req_ie) {
@@ -1157,7 +1158,10 @@ void rtw_surveydone_event_callback(_adapter	*adapter, u8 *pbuf)
 #endif
 
 	if (pmlmepriv->to_join) {
+		RTW_INFO("SURVEY EVENT DONE to JOIN\n");
+
 		if ((check_fwstate(pmlmepriv, WIFI_ADHOC_STATE))) {
+			RTW_INFO("SURVEY EVENT DONE state ADHOC\n");
 			if (check_fwstate(pmlmepriv, _FW_LINKED) == false) {
 				set_fwstate(pmlmepriv, _FW_UNDER_LINKING);
 
@@ -1187,6 +1191,7 @@ void rtw_surveydone_event_callback(_adapter	*adapter, u8 *pbuf)
 				}
 			}
 		} else {
+			RTW_INFO("SURVEY EVENT DONE state NORMAL\n");
 			int s_ret;
 			set_fwstate(pmlmepriv, _FW_UNDER_LINKING);
 			pmlmepriv->to_join = false;
@@ -1221,6 +1226,8 @@ void rtw_surveydone_event_callback(_adapter	*adapter, u8 *pbuf)
 			}
 		}
 	} else {
+		RTW_INFO("SURVEY EVENT DONE to ROAM\n");
+
 		if (rtw_chk_roam_flags(adapter, RTW_ROAM_ACTIVE)) {
 			if (check_fwstate(pmlmepriv, WIFI_STATION_STATE)
 			    && check_fwstate(pmlmepriv, _FW_LINKED)) {
@@ -2931,6 +2938,8 @@ static int rtw_check_roaming_candidate(struct mlme_priv *mlme
 	u8 *ptmp = NULL;
 #endif
 
+	RTW_INFO("Check roaming candidate: \n");
+
 
 	if (is_same_ess(&competitor->network, &mlme->cur_network.network) == false)
 		goto exit;
@@ -3007,6 +3016,7 @@ int rtw_select_roaming_candidate(struct mlme_priv *mlme)
 	struct	wlan_network	*candidate = NULL;
 	u8		bSupportAntDiv = false;
 
+	RTW_INFO("SELECT ROAM CANDIDATE\n");
 
 	if (mlme->cur_network_scanned == NULL) {
 		rtw_warn_on(1);
@@ -3029,7 +3039,7 @@ int rtw_select_roaming_candidate(struct mlme_priv *mlme)
 
 		mlme->pscanned = get_next(mlme->pscanned);
 
-		if (0)
+		if (1)
 			RTW_INFO("%s("MAC_FMT", ch%u) rssi:%d\n"
 				 , pnetwork->network.Ssid.Ssid
 				 , MAC_ARG(pnetwork->network.MacAddress)
@@ -3151,7 +3161,9 @@ int rtw_select_and_join_from_scanned_queue(struct mlme_priv *pmlmepriv)
 	_enter_critical_bh(&(pmlmepriv->scanned_queue.lock), &irqL);
 
 #ifdef CONFIG_LAYER2_ROAMING
+	RTW_INFO("LAYER 2 ROAM\n");
 	if (pmlmepriv->roam_network) {
+		RTW_INFO("LAYER 2 ROAM exist\n");
 		candidate = pmlmepriv->roam_network;
 		pmlmepriv->roam_network = NULL;
 		goto candidate_exist;
@@ -3171,7 +3183,7 @@ int rtw_select_and_join_from_scanned_queue(struct mlme_priv *pmlmepriv)
 
 		pmlmepriv->pscanned = get_next(pmlmepriv->pscanned);
 
-		if (0)
+		if (1)
 			RTW_INFO("%s("MAC_FMT", ch%u) rssi:%d\n"
 				 , pnetwork->network.Ssid.Ssid
 				 , MAC_ARG(pnetwork->network.MacAddress)

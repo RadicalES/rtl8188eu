@@ -47,8 +47,8 @@ enum {
 #undef _dbgdump
 #undef _seqdump
 
-#define _dbgdump printk
-#define _seqdump seq_printf
+//#define _dbgdump printk
+//#define _seqdump seq_printf
 
 #ifdef CONFIG_RTW_DEBUG
 

@@ -3169,7 +3169,7 @@ void rtw_dump_rsvd_page(void *sel, _adapter *adapter, u8 page_offset, u8 page_nu
 
 		if (buffer) {
 			rtw_hal_get_rsvd_page(adapter, page_offset, page_num, buffer, buf_size);
-			_RTW_DUMP_SEL(sel, buffer, buf_size);
+			//_RTW_DUMP_SEL(sel, buffer, buf_size);
 			rtw_vmfree(buffer, buf_size);
 		} else
 			RTW_PRINT_SEL(sel, "ERROR - rsvd_buf mem allocate failed\n");

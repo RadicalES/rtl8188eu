@@ -15,6 +15,8 @@ endif
 
 EXTRA_CFLAGS += -I$(src)
 
+EXTRA_LDFLAGS += --strip-debug
+
 CONFIG_AUTOCFG_CP = n
 
 ########################## Features ###########################
@@ -28,16 +30,23 @@ CONFIG_RTW_ADAPTIVITY_MODE = normal
 CONFIG_BR_EXT = y
 CONFIG_RTW_NAPI = y
 CONFIG_RTW_GRO = y
+CONFIG_RTW_80211R = y
+CONFIG_LAYER2_ROAMING = y
+CONFIG_IOCTL_CFG80211 = y
+CONFIG_IEEE80211W = y
+CONFIG_LAYER2_ROAMING_ACTIVE = y
+
 ########################## Debug ###########################
-CONFIG_RTW_DEBUG = y
+CONFIG_RTW_DEBUG = n
 # please refer to "How_to_set_driver_debug_log_level.doc" to set the available level.
-CONFIG_RTW_LOG_LEVEL = 2
+CONFIG_RTW_LOG_LEVEL = 5
 ######################## Wake On Lan ##########################
 CONFIG_WAKEUP_GPIO_IDX = default
 ######### Notify SDIO Host Keep Power During Syspend ##########
 CONFIG_RTW_SDIO_PM_KEEP_POWER = y
 ###################### Platform Related #######################
-CONFIG_PLATFORM_I386_PC = y
+CONFIG_PLATFORM_I386_PC = n
+CONFIG_PLATFORM_ARM_ATMEL = y
 ###############################################################
 
 export TopDIR ?= $(CURDIR)
@@ -46,7 +55,8 @@ MSG="Directory .git does not exist indicating that you downloaded the source as 
 
 ########### COMMON  #################################
 
-HCI_NAME = usb
+HCI_NAME = usbMODULE_NAME = 8188eu 
+MODULE_NAME = 8188eu
 
 _OS_INTFS_FILES :=	osdep_service.o \
 			os_intfs.o \
@@ -263,6 +273,22 @@ ifeq ($(CONFIG_AP_WOWLAN), y)
 EXTRA_CFLAGS += -DCONFIG_AP_WOWLAN
 endif
 
+ifeq ($(CONFIG_RTW_80211R), y)
+EXTRA_CFLAGS += -DCONFIG_RTW_80211R
+endif
+
+ifeq ($(CONFIG_LAYER2_ROAMING), y)
+EXTRA_CFLAGS += -DCONFIG_LAYER2_ROAMING
+endif
+
+ifeq ($(CONFIG_LAYER2_ROAMING_ACTIVE), y)
+EXTRA_CFLAGS += -DCONFIG_LAYER2_ROAMING_ACTIVE
+endif
+
+ifeq ($(CONFIG_IOCTL_CFG80211), y)
+EXTRA_CFLAGS += -DCONFIG_IOCTL_CFG80211
+endif
+
 ifeq ($(CONFIG_PNO_SUPPORT), y)
 EXTRA_CFLAGS += -DCONFIG_PNO_SUPPORT
 ifeq ($(CONFIG_PNO_SET_DEBUG), y)
@@ -338,27 +364,13 @@ EXTRA_CFLAGS += -DDM_ODM_SUPPORT_TYPE=0x04
 
 EXTRA_CFLAGS += -DRTW_USE_CFG80211_STA_EVENT
 
-SUBARCH := $(shell uname -m | sed -e "s/i.86/i386/; s/ppc.*/powerpc/; s/armv.l/arm/; s/aarch64/arm64/;")
-ARCH ?= $(SUBARCH)
-CROSS_COMPILE ?=
-KVER  ?= $(if $(KERNELRELEASE),$(KERNELRELEASE),$(shell uname -r))
-KSRC := /lib/modules/$(KVER)/build
-MODDESTDIR := /lib/modules/$(KVER)/kernel/drivers/net/wireless/
-INSTALL_PREFIX :=
-
-ifeq ($(CONFIG_MULTIDRV), y)
-
-
-MODULE_NAME := rtw_usb
-
+ifeq ($(CONFIG_PLATFORM_ARM_ATMEL), y)
+EXTRA_CFLAGS += -DCONFIG_LITTLE_ENDIAN
+# EXTRA_CFLAGS += -DCONFIG_IOCTL_CFG80211 -DRTW_USE_CFG80211_STA_EVENT -DCONFIG_DEBUG_CFG80211 -DDBG_CMD_QUEUE
+# EXTRA_CFLAGS += -DCONFIG_CONCURRENT_MODE
 endif
 
-USER_MODULE_NAME ?=
-ifneq ($(USER_MODULE_NAME),)
-MODULE_NAME := $(USER_MODULE_NAME)
-endif
 
-ifneq ($(KERNELRELEASE),)
 
 rtk_core :=	rtw_cmd.o \
 		rtw_security.o \
@@ -388,58 +400,22 @@ rtk_core :=	rtw_cmd.o \
 		rtw_odm.o \
 		rtw_efuse.o 
 
-8188eu-y += $(rtk_core)
+rtl$(MODULE_NAME)-y += $(rtk_core)
 
-8188eu-$(CONFIG_INTEL_WIDI) += rtw_intel_widi.o
+rtl$(MODULE_NAME)-$(CONFIG_INTEL_WIDI) += rtw_intel_widi.o
 
-8188eu-$(CONFIG_WAPI_SUPPORT) += rtw_wapi.o	\
-					rtw_wapi_sms4.o
+rtl$(MODULE_NAME)-$(CONFIG_WAPI_SUPPORT) += rtw_wapi.o rtw_wapi_sms4.o
 
-8188eu-y += $(_OS_INTFS_FILES)
-8188eu-y += $(_HAL_INTFS_FILES)
-8188eu-y += $(_OUTSRC_FILES)
+rtl$(MODULE_NAME)-y += $(_OS_INTFS_FILES)
+rtl$(MODULE_NAME)-y += $(_HAL_INTFS_FILES)
+rtl$(MODULE_NAME)-y += $(_OUTSRC_FILES)
 
-8188eu-$(CONFIG_MP_INCLUDED) += rtw_mp.o
+rtl$(MODULE_NAME)-$(CONFIG_MP_INCLUDED) += rtw_mp.o
 
 ifeq ($(CONFIG_RTL8723B), y)
-8188eu-$(CONFIG_MP_INCLUDED)+= rtw_bt_mp.o
+rtl$(MODULE_NAME)-$(CONFIG_MP_INCLUDED)+= rtw_bt_mp.o
 endif
 
-obj-m := 8188eu.o
+obj-$(CONFIG_RTL8188EU) := rtl$(MODULE_NAME).o
 
-else
-
-all: test modules
-
-test:
-	@if [ !  -e  ./.git ] ; then echo $(MSG); exit 1; fi;
-
-modules:
-	$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) -C $(KSRC) M=$(CURDIR)  modules
-
-strip:
-	$(CROSS_COMPILE)strip 8188eu.ko --strip-unneeded
-
-install:
-	install -p -m 644 8188eu.ko  $(MODDESTDIR)
-	/sbin/depmod -a ${KVER}
-
-uninstall:
-	rm -f $(MODDESTDIR)/8188eu.ko
-	/sbin/depmod -a ${KVER}
-
-config_r:
-	@echo "make config"
-	/bin/bash script/Configure script/config.in
-
-
-.PHONY: modules clean
-
-clean:
-	#$(MAKE) -C $(KSRC) M=$(CURDIR) clean
-	cd core ; rm -fr *.mod.c *.mod *.o .*.cmd *.ko
-	rm -fr Module.symvers ; rm -fr Module.markers ; rm -fr modules.order
-	rm -fr *.mod.c *.mod *.o .*.cmd *.ko *~
-	rm -fr .tmp_versions
-endif
 
